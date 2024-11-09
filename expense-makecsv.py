@@ -9,46 +9,53 @@ Created on Sat Nov  9 15:11:53 2024
 import csv
 import sys
 
-
+# define function to prompt user input that checks for valid inputs
 def get_int_input():
     raw = ''
     while raw.isdigit() == False:
         raw = input('enter expense account id number (0 for help): ')
     return int(raw) 
 
+# pull file name from command line
 filename = sys.argv[1]
 
-expenses = ['Costs of Good Sold',
+# expense account id list
+expenses = ['Cost of Goods Sold',
             'Advertising and Marketing',
             'Automobile Expense',
             'Bank Fees and Charges',
-            '[ INSURANCE ] Liability Insurance',
+            'Liability Insurance',
             'Other Expenses',
             'Printing and Stationary',
             'Rent Expense',
-            'Repairs and Maitenance',
+            'Repairs and Maintenance',
             'Tax Paid Expense',
             'Office Supplies',
             'Square Fees',
             'Stripe Fees',
-            'Licensing and Permits']
+            'Licensing and Permits',
+            'Telephone Expense']
 
+# using the given csv file, load the data into month expenses
 month_expenses = []
 with open(filename + '.csv', newline='') as csvfile:
     spamreader = csv.reader(csvfile, delimiter=' ', quotechar='|')
     for row in spamreader:
         month_expenses.append(row)
         
+# modify the data and save the reformatted data to a new file 'filename-zoho.csv'
 csvwrite = open(filename + '-zoho.csv', 'w', newline='')
 spamwriter = csv.writer(csvwrite, delimiter=' ')
-spamwriter.writerow(['Entry Number','Expense Date','Expense Account','Paid Through','Expense Amount','Expense Description'])
 
+#write header info
+spamwriter.writerow(['Entry Number','Expense Date','Expense Account','Paid Through','Expense Amount','Expense Description'])
 for curr in range(int(len(month_expenses)/4)):
     date = month_expenses[curr*4][0][1::] + '/24'
     paid_through = 'Sauwce LLC'
     amount = float(month_expenses[curr*4+3][0])
     descript = '_'.join(month_expenses[curr*4+0][1::]) + '_' + '_'.join(month_expenses[curr*4+1])
     vendor = '_'.join(month_expenses[curr*4+1])
+    
     # prompt user to assign expense account id to expense
     print(f'Current expense from: {vendor} for: $' + '{:0.2f}'.format(amount))
     raw = get_int_input()   
@@ -56,20 +63,21 @@ for curr in range(int(len(month_expenses)/4)):
         if raw == 0:
             print("""
                 0  - HELP
-                1  - 'Costs of Good Sold'
+                1  - 'Cost of Goods Sold'
                 2  - 'Advertising and Marketing'
                 3  - 'Automobile Expense'
                 4  - 'Bank Fees and Charges'
-                5  - '[ INSURANCE ] Liability Insurance'
+                5  - 'Liability Insurance'
                 6  - 'Other Expenses'
                 7  - 'Printing and Stationary'
                 8  - 'Rent Expense'
-                9  - 'Repairs and Maitenance'
+                9  - 'Repairs and Maintenance'
                 10 - 'Tax Paid Expense'
                 11 - 'Office Supplies'
                 12 - 'Square Fees'
                 13 - 'Stripe Fees'
                 14 - 'Licensing and Permits'
+                15 - 'Telephone Expense'
                   """)
             print(f'Current expense from: {vendor} for: $' + '{:0.2f}'.format(amount))
             raw = get_int_input() 
@@ -77,9 +85,11 @@ for curr in range(int(len(month_expenses)/4)):
             print("""\n*** enter a valid expense account id or '0' for help ***""")
             print(f'Current expense from: {vendor} for: $' + '{:0.2f}'.format(amount))
             raw = get_int_input() 
+    # expense account id is defined by given user index for expenses list
     account = expenses[raw-1]
     
     # write the data to the csv file
     spamwriter.writerow([curr,date,account,paid_through,amount,descript])
-    
+
+# close csv file
 csvwrite.close()
