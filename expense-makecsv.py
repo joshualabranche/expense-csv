@@ -47,7 +47,7 @@ with open(filename + '.csv', newline='') as csvfile:
 csvwrite = open(filename + '-zoho.csv', 'w', newline='')
 spamwriter = csv.writer(csvwrite, delimiter=' ')
 
-#write header info
+# write header info
 spamwriter.writerow(['Entry Number','Expense Date','Expense Account','Paid Through','Expense Amount','Expense Description'])
 for curr in range(int(len(month_expenses)/4)):
     date = month_expenses[curr*4][0][1::] + '/24'
