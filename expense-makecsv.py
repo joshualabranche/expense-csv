@@ -14,8 +14,6 @@ def get_int_input():
     raw = ''
     while raw.isdigit() == False:
         raw = input('enter expense account id number (0 for help): ')
-    if raw/int(raw) > 1:
-        print(f'using {int(raw)} instead of {raw}')
     return int(raw) 
 
 # pull file name from command line
