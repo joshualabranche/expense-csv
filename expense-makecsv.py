@@ -41,16 +41,16 @@ expenses = ['Cost of Goods Sold',
 # using the given csv file, load the data into month expenses
 month_expenses = []
 with open(filename + '.csv', newline='') as csvfile:
-    spamreader = csv.reader(csvfile, delimiter=' ', quotechar='|')
-    for row in spamreader:
+    csvreader = csv.reader(csvfile, delimiter=' ', quotechar='|')
+    for row in csvreader:
         month_expenses.append(row)
         
 # modify the data and save the reformatted data to a new file 'filename-zoho.csv'
 csvwrite = open(filename + '-zoho.csv', 'w', newline='')
-spamwriter = csv.writer(csvwrite, delimiter=' ')
+csvwriter = csv.writer(csvwrite, delimiter=' ')
 
 # write header info
-spamwriter.writerow(['Entry Number','Expense Date','Expense Account','Paid Through','Expense Amount','Expense Description'])
+csvwriter.writerow(['Entry Number','Expense Date','Expense Account','Paid Through','Expense Amount','Expense Description'])
 for curr in range(int(len(month_expenses)/4)):
     date = month_expenses[curr*4][0][1::] + '/24'
     paid_through = 'Sauwce LLC'
@@ -93,7 +93,7 @@ for curr in range(int(len(month_expenses)/4)):
     account = expenses[raw-1]
     
     # write the data to the csv file
-    spamwriter.writerow([curr,date,account,paid_through,amount,descript])
+    csvwriter.writerow([curr,date,account,paid_through,amount,descript])
 
 # close csv file
 csvwrite.close()
