@@ -12,7 +12,7 @@ add checks, bank fees, and withdrawals
     - amount: dollar amount
 
 run the script in the terminal with the newly created expense sheet
-$ python3 expense-makecsv.py "new_expense_sheet.csv"
+ - $ python3 expense-makecsv.py "new_expense_sheet.csv"
 
 program will prompt user to ennter expense account id for every expense
 
