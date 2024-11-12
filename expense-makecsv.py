@@ -35,7 +35,8 @@ expenses = ['Cost of Goods Sold',
             'Stripe Fees',
             'Licensing and Permits',
             'Telephone Expense',
-            'Furniture and Equipment']
+            'Furniture and Equipment',
+            'Meals and Entertainment']
 
 # using the given csv file, load the data into month expenses
 month_expenses = []
@@ -79,7 +80,8 @@ for curr in range(int(len(month_expenses)/4)):
                 13 - 'Stripe Fees'
                 14 - 'Licensing and Permits'
                 15 - 'Telephone Expense'
-                16 - 'Fruniture and Equipment'
+                16 - 'Furniture and Equipment'
+                17 - 'Meals and Entertainment'
                   """)
             print(f'Current expense from: {vendor} for: $' + '{:0.2f}'.format(amount))
             raw = get_int_input() 
