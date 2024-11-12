@@ -51,6 +51,8 @@ csvwriter = csv.writer(csvwrite, delimiter=' ')
 
 # write header info
 csvwriter.writerow(['Entry Number','Expense Date','Expense Account','Paid Through','Expense Amount','Expense Description'])
+
+# loop through data in csv file and reorganize for parsing in zoho
 for curr in range(int(len(month_expenses)/4)):
     date = month_expenses[curr*4][0][1::] + '/24'
     paid_through = 'Sauwce LLC'
