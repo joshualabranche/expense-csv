@@ -130,6 +130,7 @@ spamwriter = csv.writer(csvwrite, delimiter=' ')
 # write header info
 spamwriter.writerow(['Entry Number','Expense Date','Expense Account','Paid Through','Expense Amount','Expense Description'])
 
+expense_num = 0
 for page_num in range(expense_page_start,expense_page_end+1):
     page_lines = pdf_file.pages[page_num].extract_text().splitlines()
     if page_num == expense_page_start:
@@ -149,7 +150,8 @@ for page_num in range(expense_page_start,expense_page_end+1):
             account = expenses[raw-1]
     
             # write the data to the csv file
-            spamwriter.writerow([curr,date,account,paid_through,amount,descript])
+            spamwriter.writerow([expense_num,date,account,paid_through,amount,descript])
+            expense_num += 1
     
     elif page_num == expense_page_end:
         num_expenses = int((expense_line_end-12)/4)
@@ -168,7 +170,8 @@ for page_num in range(expense_page_start,expense_page_end+1):
             account = expenses[raw-1]
     
             # write the data to the csv file
-            spamwriter.writerow([curr,date,account,paid_through,amount,descript])
+            spamwriter.writerow([expense_num,date,account,paid_through,amount,descript])
+            expense_num += 1
     
     else:
         for curr in range(int((len(page_lines)-12)/4)):
@@ -186,7 +189,8 @@ for page_num in range(expense_page_start,expense_page_end+1):
             account = expenses[raw-1]
     
             # write the data to the csv file
-            spamwriter.writerow([curr,date,account,paid_through,amount,descript])
+            spamwriter.writerow([expense_num,date,account,paid_through,amount,descript])
+            expense_num += 1
 
 # close csv file
 csvwrite.close()
