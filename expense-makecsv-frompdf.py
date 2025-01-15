@@ -93,7 +93,10 @@ expense_line_end = 0
 page_lines = pdf_file.pages[expense_page_end].extract_text().splitlines()
 for lines in page_lines:
     if lines[0:9]=='Subtotal:':
-        break
+        if expense_line_end < expense_line_start:
+            expense_line_end += 1
+        else:
+            break
     else:
         expense_line_end += 1
 
