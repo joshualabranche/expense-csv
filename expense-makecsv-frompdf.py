@@ -148,7 +148,7 @@ for page_num in range(expense_page_start,expense_page_end+1):
             account = expenses[raw-1]
     
             # write the data to the csv file
-            spamwriter.writerow([expense_num,date,account,paid_through,amount,descript])
+            spamwriter.writerow([expense_num,date,account,paid_through,amount,vendor])
             expense_num += 1
         break
     # process the first page here as it may start at any line
@@ -169,7 +169,7 @@ for page_num in range(expense_page_start,expense_page_end+1):
             account = expenses[raw-1]
     
             # write the data to the csv file
-            spamwriter.writerow([expense_num,date,account,paid_through,amount,descript])
+            spamwriter.writerow([expense_num,date,account,paid_through,amount,vendor])
             expense_num += 1
     # process the last page here as it may end on any line
     elif page_num == expense_page_end:
@@ -189,7 +189,7 @@ for page_num in range(expense_page_start,expense_page_end+1):
             account = expenses[raw-1]
     
             # write the data to the csv file
-            spamwriter.writerow([expense_num,date,account,paid_through,amount,descript])
+            spamwriter.writerow([expense_num,date,account,paid_through,amount,vendor])
             expense_num += 1
     # process the middle pages
     else:
@@ -208,7 +208,7 @@ for page_num in range(expense_page_start,expense_page_end+1):
             account = expenses[raw-1]
     
             # write the data to the csv file
-            spamwriter.writerow([expense_num,date,account,paid_through,amount,descript])
+            spamwriter.writerow([expense_num,date,account,paid_through,amount,vendor])
             expense_num += 1
 
 # close csv file
