@@ -146,7 +146,8 @@ for page_num in range(expense_page_start,expense_page_end+1):
     
             # write the data to the csv file
             spamwriter.writerow([expense_num,date,account,paid_through,amount,descript])
-            expense_num += 1    
+            expense_num += 1
+        break
     # process the first page here as it may start at any line
     if page_num == expense_page_start:
         num_expenses = int((len(page_lines) - expense_line_start)/4)
