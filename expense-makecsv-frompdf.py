@@ -134,8 +134,8 @@ for page_num in range(expense_page_start,expense_page_end+1):
     if expense_page_start == expense_page_end:
         num_expenses = int((expense_line_end - expense_line_start)/4)
         for curr in range(num_expenses):
-            date = page_lines[expense_line_start+4*0].split(' ')[0] + '/24'
-            descript = '_'.join(page_lines[expense_line_start+4*0].split(' ')[1::])
+            date = page_lines[expense_line_start+4*curr].split(' ')[0] + '/24'
+            descript = '_'.join(page_lines[expense_line_start+4*curr].split(' ')[1::])
             vendor = page_lines[expense_line_start+1+4*curr]
             card = page_lines[expense_line_start+2+4*curr]
             amount = float(page_lines[expense_line_start+3+4*curr])
@@ -155,8 +155,8 @@ for page_num in range(expense_page_start,expense_page_end+1):
     if page_num == expense_page_start:
         num_expenses = int((len(page_lines) - expense_line_start)/4)
         for curr in range(num_expenses):
-            date = page_lines[expense_line_start+4*0].split(' ')[0] + '/24'
-            descript = '_'.join(page_lines[expense_line_start+4*0].split(' ')[1::])
+            date = page_lines[expense_line_start+4*curr].split(' ')[0] + '/24'
+            descript = '_'.join(page_lines[expense_line_start+4*curr].split(' ')[1::])
             vendor = page_lines[expense_line_start+1+4*curr]
             card = page_lines[expense_line_start+2+4*curr]
             amount = float(page_lines[expense_line_start+3+4*curr])
@@ -175,8 +175,8 @@ for page_num in range(expense_page_start,expense_page_end+1):
     elif page_num == expense_page_end:
         num_expenses = int((expense_line_end-12)/4)
         for curr in range(num_expenses):
-            date = page_lines[12+4*0].split(' ')[0] + '/24'
-            descript = '_'.join(page_lines[12+4*0].split(' ')[1::])
+            date = page_lines[12+4*curr].split(' ')[0] + '/24'
+            descript = '_'.join(page_lines[12+4*curr].split(' ')[1::])
             vendor = page_lines[13+4*curr]
             card = page_lines[14+4*curr]
             amount = float(page_lines[15+4*curr])
@@ -194,8 +194,8 @@ for page_num in range(expense_page_start,expense_page_end+1):
     # process the middle pages
     else:
         for curr in range(int((len(page_lines)-12)/4)):
-            date = page_lines[12+4*0].split(' ')[0] + '/24'
-            descript = '_'.join(page_lines[12+4*0].split(' ')[1::])
+            date = page_lines[12+4*curr].split(' ')[0] + '/24'
+            descript = '_'.join(page_lines[12+4*curr].split(' ')[1::])
             vendor = page_lines[13+4*curr]
             card = page_lines[14+4*curr]
             amount = float(page_lines[15+4*curr])
