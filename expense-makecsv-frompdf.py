@@ -6,14 +6,6 @@ Created on Tue Jan 14 21:30:02 2025
 @author: jlab
 """
 
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Sat Nov  9 15:11:53 2024
-
-@author: jlab
-"""
-
 import csv
 import pypdf
 import sys
@@ -130,9 +122,32 @@ spamwriter = csv.writer(csvwrite, delimiter=' ')
 # write header info
 spamwriter.writerow(['Entry Number','Expense Date','Expense Account','Paid Through','Expense Amount','Expense Description'])
 
+# counter to keep track of the expense number
 expense_num = 0
 for page_num in range(expense_page_start,expense_page_end+1):
+    # pull the lines from the current page
     page_lines = pdf_file.pages[page_num].extract_text().splitlines()
+    # process unique case where there is only one page
+    if expense_page_start == expense_page_end:
+        num_expenses = int((expense_line_end - expense_line_start)/4)
+        for curr in range(num_expenses):
+            date = page_lines[expense_line_start+4*0].split(' ')[0] + '/24'
+            descript = '_'.join(page_lines[expense_line_start+4*0].split(' ')[1::])
+            vendor = page_lines[expense_line_start+1+4*curr]
+            card = page_lines[expense_line_start+2+4*curr]
+            amount = float(page_lines[expense_line_start+3+4*curr])
+            paid_through = 'Sauwce LLC'
+            
+            # prompt user to assign epense to an account
+            raw = get_expense_account(expenses, vendor, amount)
+    
+            # expense account id is defined by given user index for expenses list
+            account = expenses[raw-1]
+    
+            # write the data to the csv file
+            spamwriter.writerow([expense_num,date,account,paid_through,amount,descript])
+            expense_num += 1    
+    # process the first page here as it may start at any line
     if page_num == expense_page_start:
         num_expenses = int((len(page_lines) - expense_line_start)/4)
         for curr in range(num_expenses):
@@ -152,7 +167,7 @@ for page_num in range(expense_page_start,expense_page_end+1):
             # write the data to the csv file
             spamwriter.writerow([expense_num,date,account,paid_through,amount,descript])
             expense_num += 1
-    
+    # process the last page here as it may end on any line
     elif page_num == expense_page_end:
         num_expenses = int((expense_line_end-12)/4)
         for curr in range(num_expenses):
@@ -172,7 +187,7 @@ for page_num in range(expense_page_start,expense_page_end+1):
             # write the data to the csv file
             spamwriter.writerow([expense_num,date,account,paid_through,amount,descript])
             expense_num += 1
-    
+    # process the middle pages
     else:
         for curr in range(int((len(page_lines)-12)/4)):
             date = page_lines[12+4*0].split(' ')[0] + '/24'
