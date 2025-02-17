@@ -9,6 +9,7 @@ Created on Tue Jan 14 21:30:02 2025
 import csv
 import pypdf
 import sys
+import datetime
 
 # define function to prompt user input that checks for valid inputs
 def get_int_input():
@@ -58,6 +59,11 @@ outname  = sys.argv[2]
 # load up the pdf statement
 pdf_file = pypdf.PdfReader(filename)
 num_pages = pdf_file.get_num_pages()
+
+# what year is it?
+#year = datetime.datetime.now().strftime("%Y")[2::]
+year = pdf_file.pages[0].extract_text().splitlines()
+year = year[7][-2::]
 
 # look for the page and line where electronic payments start
 expense_page_start = 0
@@ -134,7 +140,7 @@ for page_num in range(expense_page_start,expense_page_end+1):
     if expense_page_start == expense_page_end:
         num_expenses = int((expense_line_end - expense_line_start)/4)
         for curr in range(num_expenses):
-            date = page_lines[expense_line_start+4*curr].split(' ')[0] + '/24'
+            date = page_lines[expense_line_start+4*curr].split(' ')[0] + '/' + year
             descript = '_'.join(page_lines[expense_line_start+4*curr].split(' ')[1::])
             vendor = page_lines[expense_line_start+1+4*curr]
             card = page_lines[expense_line_start+2+4*curr]
@@ -155,7 +161,7 @@ for page_num in range(expense_page_start,expense_page_end+1):
     if page_num == expense_page_start:
         num_expenses = int((len(page_lines) - expense_line_start)/4)
         for curr in range(num_expenses):
-            date = page_lines[expense_line_start+4*curr].split(' ')[0] + '/24'
+            date = page_lines[expense_line_start+4*curr].split(' ')[0] + '/' + year
             descript = '_'.join(page_lines[expense_line_start+4*curr].split(' ')[1::])
             vendor = page_lines[expense_line_start+1+4*curr]
             card = page_lines[expense_line_start+2+4*curr]
@@ -175,7 +181,7 @@ for page_num in range(expense_page_start,expense_page_end+1):
     elif page_num == expense_page_end:
         num_expenses = int((expense_line_end-12)/4)
         for curr in range(num_expenses):
-            date = page_lines[12+4*curr].split(' ')[0] + '/24'
+            date = page_lines[12+4*curr].split(' ')[0] + '/' + year
             descript = '_'.join(page_lines[12+4*curr].split(' ')[1::])
             vendor = page_lines[13+4*curr]
             card = page_lines[14+4*curr]
@@ -194,7 +200,7 @@ for page_num in range(expense_page_start,expense_page_end+1):
     # process the middle pages
     else:
         for curr in range(int((len(page_lines)-12)/4)):
-            date = page_lines[12+4*curr].split(' ')[0] + '/24'
+            date = page_lines[12+4*curr].split(' ')[0] + '/' + year
             descript = '_'.join(page_lines[12+4*curr].split(' ')[1::])
             vendor = page_lines[13+4*curr]
             card = page_lines[14+4*curr]
