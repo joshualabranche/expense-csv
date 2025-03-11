@@ -89,7 +89,7 @@ found_page = False
 for current_page in range(expense_page_start+1,num_pages):
     page_lines = pdf_file.pages[current_page].extract_text().splitlines()
     if len(page_lines) > 10:
-        if page_lines[10] == 'Electronic Payments (continued)':
+        if (page_lines[10] == 'Electronic Payments (continued)') or (page_lines[0] == 'How to Balance your Account'):
             expense_page_end += 1
     else:
         break
@@ -199,6 +199,10 @@ for page_num in range(expense_page_start,expense_page_end+1):
             expense_num += 1
     # process the middle pages
     else:
+        #skip the "How to Balance Page"
+        if page_lines[0]=="How to Balance your Account":
+            continue
+
         for curr in range(int((len(page_lines)-12)/4)):
             date = page_lines[12+4*curr].split(' ')[0] + '/' + year
             descript = '_'.join(page_lines[12+4*curr].split(' ')[1::])
