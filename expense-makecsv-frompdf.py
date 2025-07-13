@@ -10,6 +10,13 @@ import csv
 import pypdf
 import sys
 import datetime
+import tkinter as tk
+from tkinter import filedialog
+
+def get_file_path():
+    root = tk.Tk()
+    root.withdraw()
+    return filedialog.askopenfilename()
 
 # define function to prompt user input that checks for valid inputs
 def get_int_input():
@@ -53,11 +60,12 @@ def get_expense_account(expenses,vendor,amount):
     return raw
 
 # pull file name from command line
-filename = sys.argv[1]
-outname  = sys.argv[2]
+filepath = get_file_path()
+filename = filepath.split('/')[-1]
+outname  = '/' + '/'.join(filepath.split('/')[1:-1]) + '/expense' + filename[-15:-4]
 
 # load up the pdf statement
-pdf_file = pypdf.PdfReader(filename)
+pdf_file = pypdf.PdfReader(filepath)
 num_pages = pdf_file.get_num_pages()
 
 # what year is it?
