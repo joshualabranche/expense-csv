@@ -8,8 +8,6 @@ Created on Tue Jan 14 21:30:02 2025
 
 import csv
 import pypdf
-import sys
-import datetime
 import tkinter as tk
 from tkinter import filedialog
 
@@ -59,175 +57,180 @@ def get_expense_account(expenses,vendor,amount):
             raw = get_int_input()          
     return raw
 
-# pull file name from command line
-filepath = get_file_path()
-filename = filepath.split('/')[-1]
-outname  = '/' + '/'.join(filepath.split('/')[1:-1]) + '/expense' + filename[-15:-4]
-
-# load up the pdf statement
-pdf_file = pypdf.PdfReader(filepath)
-num_pages = pdf_file.get_num_pages()
-
-# what year is it?
-#year = datetime.datetime.now().strftime("%Y")[2::]
-year = pdf_file.pages[0].extract_text().splitlines()
-year = year[7][-2::]
-
-# look for the page and line where electronic payments start
-expense_page_start = 0
-expense_line_start = 0
-found_page = False
-for current_page in range(num_pages):
-    page_lines = pdf_file.pages[current_page].extract_text().splitlines()
-    for lines in page_lines:
-        if lines=='Electronic Payments':
-            found_page = True
+def main():
+    # pull file name from command line
+    filepath = get_file_path()
+    filename = filepath.split('/')[-1]
+    outname  = '/' + '/'.join(filepath.split('/')[1:-1]) + '/expense' + filename[-15:-4]
+    
+    # load up the pdf statement
+    pdf_file = pypdf.PdfReader(filepath)
+    num_pages = pdf_file.get_num_pages()
+    
+    # what year is it?
+    #year = datetime.datetime.now().strftime("%Y")[2::]
+    year = pdf_file.pages[0].extract_text().splitlines()
+    year = year[7][-2::]
+    
+    # look for the page and line where electronic payments start
+    expense_page_start = 0
+    expense_line_start = 0
+    found_page = False
+    for current_page in range(num_pages):
+        page_lines = pdf_file.pages[current_page].extract_text().splitlines()
+        for lines in page_lines:
+            if lines=='Electronic Payments':
+                found_page = True
+                break
+            expense_line_start += 1
+        if found_page==True:
             break
-        expense_line_start += 1
-    if found_page==True:
-        break
-    else:
-        expense_line_start = 0
-    expense_page_start += 1
-expense_line_start += 2
-
-# look for the page where electronic payments end
-expense_page_end = expense_page_start
-found_page = False
-for current_page in range(expense_page_start+1,num_pages):
-    page_lines = pdf_file.pages[current_page].extract_text().splitlines()
-    if len(page_lines) > 10:
-        if (page_lines[10] == 'Electronic Payments (continued)') or (page_lines[0] == 'How to Balance your Account'):
-            expense_page_end += 1
-    else:
-        break
-
-# look for the last payment line on the page where electronic payments end
-expense_line_end = 0
-page_lines = pdf_file.pages[expense_page_end].extract_text().splitlines()
-for lines in page_lines:
-    if lines[0:9]=='Subtotal:':
-        if (expense_line_end < expense_line_start) and (expense_page_start==expense_page_end):
-            expense_line_end += 1
+        else:
+            expense_line_start = 0
+        expense_page_start += 1
+    expense_line_start += 2
+    
+    # look for the page where electronic payments end
+    expense_page_end = expense_page_start
+    found_page = False
+    for current_page in range(expense_page_start+1,num_pages):
+        page_lines = pdf_file.pages[current_page].extract_text().splitlines()
+        if len(page_lines) > 10:
+            if (page_lines[10] == 'Electronic Payments (continued)') or (page_lines[0] == 'How to Balance your Account'):
+                expense_page_end += 1
         else:
             break
-    else:
-        expense_line_end += 1
-
-# expense account id list
-expenses = ['Cost of Goods Sold',
-            'Advertising and Marketing',
-            'Automobile Expense',
-            'Bank Fees and Charges',
-            'Liability Insurance',
-            'Other Expenses',
-            'Printing and Stationary',
-            'Rent Expense',
-            'Repairs and Maintenance',
-            'Tax Paid Expense',
-            'Office Supplies',
-            'Square Fees',
-            'Stripe Fees',
-            'Licensing and Permits',
-            'Telephone Expense',
-            'Furniture and Equipment']
+    
+    # look for the last payment line on the page where electronic payments end
+    expense_line_end = 0
+    page_lines = pdf_file.pages[expense_page_end].extract_text().splitlines()
+    for lines in page_lines:
+        if lines[0:9]=='Subtotal:':
+            if (expense_line_end < expense_line_start) and (expense_page_start==expense_page_end):
+                expense_line_end += 1
+            else:
+                break
+        else:
+            expense_line_end += 1
+    
+    # expense account id list
+    expenses = ['Cost of Goods Sold',
+                'Advertising and Marketing',
+                'Automobile Expense',
+                'Bank Fees and Charges',
+                'Liability Insurance',
+                'Other Expenses',
+                'Printing and Stationary',
+                'Rent Expense',
+                'Repairs and Maintenance',
+                'Tax Paid Expense',
+                'Office Supplies',
+                'Square Fees',
+                'Stripe Fees',
+                'Licensing and Permits',
+                'Telephone Expense',
+                'Furniture and Equipment']
+            
+    # modify the data and save the reformatted data to a new file 'filename-zoho.csv'
+    csvwrite = open(outname + '-zoho.csv', 'w', newline='')
+    spamwriter = csv.writer(csvwrite, delimiter=' ')
+    
+    # write header info
+    spamwriter.writerow(['Entry Number','Expense Date','Expense Account','Paid Through','Expense Amount','Expense Description'])
+    
+    # counter to keep track of the expense number
+    expense_num = 0
+    for page_num in range(expense_page_start,expense_page_end+1):
+        # pull the lines from the current page
+        page_lines = pdf_file.pages[page_num].extract_text().splitlines()
+        # process unique case where there is only one page
+        if expense_page_start == expense_page_end:
+            num_expenses = int((expense_line_end - expense_line_start)/4)
+            for curr in range(num_expenses):
+                date = page_lines[expense_line_start+4*curr].split(' ')[0] + '/' + year
+                descript = '_'.join(page_lines[expense_line_start+4*curr].split(' ')[1::])
+                vendor = page_lines[expense_line_start+1+4*curr]
+                card = page_lines[expense_line_start+2+4*curr]
+                amount = float(page_lines[expense_line_start+3+4*curr])
+                paid_through = 'Sauwce LLC'
+                
+                # prompt user to assign epense to an account
+                raw = get_expense_account(expenses, vendor, amount)
         
-# modify the data and save the reformatted data to a new file 'filename-zoho.csv'
-csvwrite = open(outname + '-zoho.csv', 'w', newline='')
-spamwriter = csv.writer(csvwrite, delimiter=' ')
+                # expense account id is defined by given user index for expenses list
+                account = expenses[raw-1]
+        
+                # write the data to the csv file
+                spamwriter.writerow([expense_num,date,account,paid_through,amount,vendor])
+                expense_num += 1
+            break
+        # process the first page here as it may start at any line
+        if page_num == expense_page_start:
+            num_expenses = int((len(page_lines) - expense_line_start)/4)
+            for curr in range(num_expenses):
+                date = page_lines[expense_line_start+4*curr].split(' ')[0] + '/' + year
+                descript = '_'.join(page_lines[expense_line_start+4*curr].split(' ')[1::])
+                vendor = page_lines[expense_line_start+1+4*curr]
+                card = page_lines[expense_line_start+2+4*curr]
+                amount = float(page_lines[expense_line_start+3+4*curr])
+                paid_through = 'Sauwce LLC'
+                
+                # prompt user to assign epense to an account
+                raw = get_expense_account(expenses, vendor, amount)
+        
+                # expense account id is defined by given user index for expenses list
+                account = expenses[raw-1]
+        
+                # write the data to the csv file
+                spamwriter.writerow([expense_num,date,account,paid_through,amount,vendor])
+                expense_num += 1
+        # process the last page here as it may end on any line
+        elif page_num == expense_page_end:
+            num_expenses = int((expense_line_end-12)/4)
+            for curr in range(num_expenses):
+                date = page_lines[12+4*curr].split(' ')[0] + '/' + year
+                descript = '_'.join(page_lines[12+4*curr].split(' ')[1::])
+                vendor = page_lines[13+4*curr]
+                card = page_lines[14+4*curr]
+                amount = float(page_lines[15+4*curr])
+                paid_through = 'Sauwce LLC'
+                
+                # prompt user to assign epense to an account
+                raw = get_expense_account(expenses, vendor, amount)
+        
+                # expense account id is defined by given user index for expenses list
+                account = expenses[raw-1]
+        
+                # write the data to the csv file
+                spamwriter.writerow([expense_num,date,account,paid_through,amount,vendor])
+                expense_num += 1
+        # process the middle pages
+        else:
+            #skip the "How to Balance Page"
+            if page_lines[0]=="How to Balance your Account":
+                continue
+    
+            for curr in range(int((len(page_lines)-12)/4)):
+                date = page_lines[12+4*curr].split(' ')[0] + '/' + year
+                descript = '_'.join(page_lines[12+4*curr].split(' ')[1::])
+                vendor = page_lines[13+4*curr]
+                card = page_lines[14+4*curr]
+                amount = float(page_lines[15+4*curr])
+                paid_through = 'Sauwce LLC'
+                
+                # prompt user to assign epense to an account
+                raw = get_expense_account(expenses, vendor, amount)
+        
+                # expense account id is defined by given user index for expenses list
+                account = expenses[raw-1]
+        
+                # write the data to the csv file
+                spamwriter.writerow([expense_num,date,account,paid_through,amount,vendor])
+                expense_num += 1
+    
+    # close csv file
+    csvwrite.close()
+    
 
-# write header info
-spamwriter.writerow(['Entry Number','Expense Date','Expense Account','Paid Through','Expense Amount','Expense Description'])
-
-# counter to keep track of the expense number
-expense_num = 0
-for page_num in range(expense_page_start,expense_page_end+1):
-    # pull the lines from the current page
-    page_lines = pdf_file.pages[page_num].extract_text().splitlines()
-    # process unique case where there is only one page
-    if expense_page_start == expense_page_end:
-        num_expenses = int((expense_line_end - expense_line_start)/4)
-        for curr in range(num_expenses):
-            date = page_lines[expense_line_start+4*curr].split(' ')[0] + '/' + year
-            descript = '_'.join(page_lines[expense_line_start+4*curr].split(' ')[1::])
-            vendor = page_lines[expense_line_start+1+4*curr]
-            card = page_lines[expense_line_start+2+4*curr]
-            amount = float(page_lines[expense_line_start+3+4*curr])
-            paid_through = 'Sauwce LLC'
-            
-            # prompt user to assign epense to an account
-            raw = get_expense_account(expenses, vendor, amount)
-    
-            # expense account id is defined by given user index for expenses list
-            account = expenses[raw-1]
-    
-            # write the data to the csv file
-            spamwriter.writerow([expense_num,date,account,paid_through,amount,vendor])
-            expense_num += 1
-        break
-    # process the first page here as it may start at any line
-    if page_num == expense_page_start:
-        num_expenses = int((len(page_lines) - expense_line_start)/4)
-        for curr in range(num_expenses):
-            date = page_lines[expense_line_start+4*curr].split(' ')[0] + '/' + year
-            descript = '_'.join(page_lines[expense_line_start+4*curr].split(' ')[1::])
-            vendor = page_lines[expense_line_start+1+4*curr]
-            card = page_lines[expense_line_start+2+4*curr]
-            amount = float(page_lines[expense_line_start+3+4*curr])
-            paid_through = 'Sauwce LLC'
-            
-            # prompt user to assign epense to an account
-            raw = get_expense_account(expenses, vendor, amount)
-    
-            # expense account id is defined by given user index for expenses list
-            account = expenses[raw-1]
-    
-            # write the data to the csv file
-            spamwriter.writerow([expense_num,date,account,paid_through,amount,vendor])
-            expense_num += 1
-    # process the last page here as it may end on any line
-    elif page_num == expense_page_end:
-        num_expenses = int((expense_line_end-12)/4)
-        for curr in range(num_expenses):
-            date = page_lines[12+4*curr].split(' ')[0] + '/' + year
-            descript = '_'.join(page_lines[12+4*curr].split(' ')[1::])
-            vendor = page_lines[13+4*curr]
-            card = page_lines[14+4*curr]
-            amount = float(page_lines[15+4*curr])
-            paid_through = 'Sauwce LLC'
-            
-            # prompt user to assign epense to an account
-            raw = get_expense_account(expenses, vendor, amount)
-    
-            # expense account id is defined by given user index for expenses list
-            account = expenses[raw-1]
-    
-            # write the data to the csv file
-            spamwriter.writerow([expense_num,date,account,paid_through,amount,vendor])
-            expense_num += 1
-    # process the middle pages
-    else:
-        #skip the "How to Balance Page"
-        if page_lines[0]=="How to Balance your Account":
-            continue
-
-        for curr in range(int((len(page_lines)-12)/4)):
-            date = page_lines[12+4*curr].split(' ')[0] + '/' + year
-            descript = '_'.join(page_lines[12+4*curr].split(' ')[1::])
-            vendor = page_lines[13+4*curr]
-            card = page_lines[14+4*curr]
-            amount = float(page_lines[15+4*curr])
-            paid_through = 'Sauwce LLC'
-            
-            # prompt user to assign epense to an account
-            raw = get_expense_account(expenses, vendor, amount)
-    
-            # expense account id is defined by given user index for expenses list
-            account = expenses[raw-1]
-    
-            # write the data to the csv file
-            spamwriter.writerow([expense_num,date,account,paid_through,amount,vendor])
-            expense_num += 1
-
-# close csv file
-csvwrite.close()
+if __name__ == "__main__":
+    main()
