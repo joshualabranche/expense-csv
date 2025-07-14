@@ -188,7 +188,10 @@ def main():
         # get the lines that are the start of an expense
         expense_lines = get_expense_lines(page_lines,month,page_num==expense_page_end)
         # get any lines of expenses that are only 1 line long
-        expense_one_liners = [i for i,x in enumerate(np.diff(expense_lines)) if x==1]
+        line_diff = []
+        for i in range(len(expense_lines)-1):
+            line_diff.append(expense_lines[i+1]-expense_lines[i])
+        expense_one_liners = [i for i,x in enumerate(line_diff) if x==1]
         expense_one_liners = [expense_lines[x] for x in expense_one_liners]
        
         # process unique case where there is only one page
