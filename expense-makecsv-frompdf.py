@@ -8,8 +8,49 @@ Created on Tue Jan 14 21:30:02 2025
 
 import csv
 import pypdf
+import numpy as np
 import tkinter as tk
 from tkinter import filedialog
+
+
+def get_expense_lines(page, month, last_page=False):
+    month_to_int = {
+        'Jan' : 1,
+        'Feb' : 2,
+        'Mar' : 3,
+        'Apr' : 4,
+        'May' : 5,
+        'Jun' : 6,
+        'Jul' : 7,
+        'Aug' : 8,
+        'Sep' : 9,
+        'Oct' : 10,
+        'Nov' : 11,
+        'Dec' : 12
+        }
+    days = []
+    for i in range(31):
+        days.append(str(i+1).zfill(2))
+    
+    line_numbers = []
+    line_num = 0
+    if not last_page:
+        for line in page:
+            if any([(str(month_to_int[month]) + '/' + x) == line[0:5] for x in days]):
+            # if line[0:2] == str(month_to_int[month]):
+                line_numbers.append(line_num)
+            line_num += 1
+    else:
+        for line in page:
+            if line=='Other Withdrawals':
+                break
+            else:
+                if any([(str(month_to_int[month]) + '/' + x) == line[0:5] for x in days]):
+                # if line[0:2] == str(month_to_int[month]):
+                    line_numbers.append(line_num)
+                line_num += 1
+    
+    return line_numbers
 
 def get_file_path():
     root = tk.Tk()
@@ -70,7 +111,8 @@ def main():
     # what year is it?
     #year = datetime.datetime.now().strftime("%Y")[2::]
     year = pdf_file.pages[0].extract_text().splitlines()
-    year = year[7][-2::]
+    month = year[7][-11:-8]
+    year  = year[7][-2::]
     
     # look for the page and line where electronic payments start
     expense_page_start = 0
@@ -143,15 +185,24 @@ def main():
     for page_num in range(expense_page_start,expense_page_end+1):
         # pull the lines from the current page
         page_lines = pdf_file.pages[page_num].extract_text().splitlines()
+        # get the lines that are the start of an expense
+        expense_lines = get_expense_lines(page_lines,month,page_num==expense_page_end)
+        expense_one_liners = [i for i,x in enumerate(np.diff(expense_lines)) if x==1]
+        expense_one_liners = [expense_lines[x] for x in expense_one_liners]
+        print(expense_lines)
         # process unique case where there is only one page
         if expense_page_start == expense_page_end:
-            num_expenses = int((expense_line_end - expense_line_start)/4)
-            for curr in range(num_expenses):
-                date = page_lines[expense_line_start+4*curr].split(' ')[0] + '/' + year
-                descript = '_'.join(page_lines[expense_line_start+4*curr].split(' ')[1::])
-                vendor = page_lines[expense_line_start+1+4*curr]
-                card = page_lines[expense_line_start+2+4*curr]
-                amount = float(page_lines[expense_line_start+3+4*curr])
+
+            for expense_line in expense_lines:
+                if any([x==expense_line for x in expense_one_liners]):
+                    # handle one liners here
+                    continue
+                else:
+                    date = page_lines[expense_line].split(' ')[0] + '/' + year
+                    descript = '_'.join(page_lines[expense_line].split(' ')[1::])
+                    vendor = page_lines[expense_line+1]
+                    card = page_lines[expense_line+2]
+                    amount = float(page_lines[expense_line+3])
                 paid_through = 'Sauwce LLC'
                 
                 # prompt user to assign epense to an account
@@ -166,13 +217,17 @@ def main():
             break
         # process the first page here as it may start at any line
         if page_num == expense_page_start:
-            num_expenses = int((len(page_lines) - expense_line_start)/4)
-            for curr in range(num_expenses):
-                date = page_lines[expense_line_start+4*curr].split(' ')[0] + '/' + year
-                descript = '_'.join(page_lines[expense_line_start+4*curr].split(' ')[1::])
-                vendor = page_lines[expense_line_start+1+4*curr]
-                card = page_lines[expense_line_start+2+4*curr]
-                amount = float(page_lines[expense_line_start+3+4*curr])
+
+            for expense_line in expense_lines:
+                if any([x==expense_line for x in expense_one_liners]):
+                    # handle one liners here
+                    continue
+                else:
+                    date = page_lines[expense_line].split(' ')[0] + '/' + year
+                    descript = '_'.join(page_lines[expense_line].split(' ')[1::])
+                    vendor = page_lines[expense_line+1]
+                    card = page_lines[expense_line+2]
+                    amount = float(page_lines[expense_line+3])
                 paid_through = 'Sauwce LLC'
                 
                 # prompt user to assign epense to an account
@@ -186,13 +241,17 @@ def main():
                 expense_num += 1
         # process the last page here as it may end on any line
         elif page_num == expense_page_end:
-            num_expenses = int((expense_line_end-12)/4)
-            for curr in range(num_expenses):
-                date = page_lines[12+4*curr].split(' ')[0] + '/' + year
-                descript = '_'.join(page_lines[12+4*curr].split(' ')[1::])
-                vendor = page_lines[13+4*curr]
-                card = page_lines[14+4*curr]
-                amount = float(page_lines[15+4*curr])
+
+            for expense_line in expense_lines:
+                if any([x==expense_line for x in expense_one_liners]):
+                    # handle one liners here
+                    continue
+                else:
+                    date = page_lines[expense_line].split(' ')[0] + '/' + year
+                    descript = '_'.join(page_lines[expense_line].split(' ')[1::])
+                    vendor = page_lines[expense_line + 1]
+                    card = page_lines[expense_line + 2]
+                    amount = float(page_lines[expense_line + 3])
                 paid_through = 'Sauwce LLC'
                 
                 # prompt user to assign epense to an account
@@ -210,12 +269,17 @@ def main():
             if page_lines[0]=="How to Balance your Account":
                 continue
     
-            for curr in range(int((len(page_lines)-12)/4)):
-                date = page_lines[12+4*curr].split(' ')[0] + '/' + year
-                descript = '_'.join(page_lines[12+4*curr].split(' ')[1::])
-                vendor = page_lines[13+4*curr]
-                card = page_lines[14+4*curr]
-                amount = float(page_lines[15+4*curr])
+
+            for expense_line in expense_lines:
+                if any([x==expense_line for x in expense_one_liners]):
+                    # handle one liners here
+                    continue
+                else:
+                    date = page_lines[expense_line].split(' ')[0] + '/' + year
+                    descript = '_'.join(page_lines[expense_line].split(' ')[1::])
+                    vendor = page_lines[expense_line + 1]
+                    card = page_lines[expense_line + 2]
+                    amount = float(page_lines[expense_line + 3])
                 paid_through = 'Sauwce LLC'
                 
                 # prompt user to assign epense to an account
