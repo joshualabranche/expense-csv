@@ -35,7 +35,7 @@ def get_expense_lines(page, month, expense_start, expense_end, first_page=False,
         for line in page:
             if any([(str(month_to_int[month]).zfill(2) + '/' + x) == line[0:5] for x in days]):
                 if first_page:
-                    if line_num > expense_start:
+                    if line_num >= expense_start:
                         line_numbers.append(line_num)
                 else:
                     line_numbers.append(line_num)
@@ -45,7 +45,7 @@ def get_expense_lines(page, month, expense_start, expense_end, first_page=False,
             if line=='Other Withdrawals':
                 break
             else:
-                if any([(str(month_to_int[month]) + '/' + x) == line[0:5] for x in days]):
+                if any([(str(month_to_int[month]).zfill(2) + '/' + x) == line[0:5] for x in days]):
                 # if line[0:2] == str(month_to_int[month]):
                     line_numbers.append(line_num)
                 line_num += 1
