@@ -8,12 +8,10 @@ Created on Tue Jan 14 21:30:02 2025
 
 import csv
 import pypdf
-import numpy as np
 import tkinter as tk
 from tkinter import filedialog
 
-
-def get_expense_lines(page, month, last_page=False):
+def get_expense_lines(page, month, expense_start, expense_end, first_page=False, last_page=False):
     month_to_int = {
         'Jan' : 1,
         'Feb' : 2,
@@ -31,14 +29,16 @@ def get_expense_lines(page, month, last_page=False):
     days = []
     for i in range(31):
         days.append(str(i+1).zfill(2))
-    
     line_numbers = []
     line_num = 0
     if not last_page:
         for line in page:
-            if any([(str(month_to_int[month]) + '/' + x) == line[0:5] for x in days]):
-            # if line[0:2] == str(month_to_int[month]):
-                line_numbers.append(line_num)
+            if any([(str(month_to_int[month]).zfill(2) + '/' + x) == line[0:5] for x in days]):
+                if first_page:
+                    if line_num > expense_start:
+                        line_numbers.append(line_num)
+                else:
+                    line_numbers.append(line_num)
             line_num += 1
     else:
         for line in page:
@@ -49,7 +49,6 @@ def get_expense_lines(page, month, last_page=False):
                 # if line[0:2] == str(month_to_int[month]):
                     line_numbers.append(line_num)
                 line_num += 1
-    
     return line_numbers
 
 def get_file_path():
@@ -186,7 +185,7 @@ def main():
         # pull the lines from the current page
         page_lines = pdf_file.pages[page_num].extract_text().splitlines()
         # get the lines that are the start of an expense
-        expense_lines = get_expense_lines(page_lines,month,page_num==expense_page_end)
+        expense_lines = get_expense_lines(page_lines,month,expense_line_start,expense_line_end,page_num==expense_page_start,page_num==expense_page_end)
         # get any lines of expenses that are only 1 line long
         line_diff = []
         for i in range(len(expense_lines)-1):
@@ -221,7 +220,6 @@ def main():
             break
         # process the first page here as it may start at any line
         if page_num == expense_page_start:
-
             for expense_line in expense_lines:
                 if any([x==expense_line for x in expense_one_liners]):
                     # handle one liners here
