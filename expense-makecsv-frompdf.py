@@ -281,7 +281,7 @@ def main():
                     descript = '_'.join(page_lines[expense_line].split(' ')[1::])
                     vendor = page_lines[expense_line + 1]
                     card = page_lines[expense_line + 2]
-                    amount = float(page_lines[expense_line + 3])
+                    amount = float(''.join(page_lines[expense_line + 3].split(',')))
                 paid_through = 'Sauwce LLC'
                 
                 # prompt user to assign epense to an account
