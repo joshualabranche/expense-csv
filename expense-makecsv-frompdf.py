@@ -209,7 +209,10 @@ def main():
             for expense_line in expense_lines:
                 if any([x==expense_line for x in expense_one_liners]):
                     # handle one liners here
-                    continue
+                    # ASSUMES ONE LINERS ARE ALWAYS ATM FEES
+                    date = page_lines[expense_line].split(' ')[0] + '/' + year
+                    vendor = 'ATM FEE'
+                    amount = float(3)
                 else:
                     date = page_lines[expense_line].split(' ')[0] + '/' + year
                     descript = '_'.join(page_lines[expense_line].split(' ')[1::])
@@ -233,7 +236,10 @@ def main():
             for expense_line in expense_lines:
                 if any([x==expense_line for x in expense_one_liners]):
                     # handle one liners here
-                    continue
+                    # ASSUMES ONE LINERS ARE ALWAYS ATM FEES
+                    date = page_lines[expense_line].split(' ')[0] + '/' + year
+                    vendor = 'ATM FEE'
+                    amount = float(3)
                 else:
                     date = page_lines[expense_line].split(' ')[0] + '/' + year
                     descript = '_'.join(page_lines[expense_line].split(' ')[1::])
@@ -256,13 +262,16 @@ def main():
             for expense_line in expense_lines:
                 if any([x==expense_line for x in expense_one_liners]):
                     # handle one liners here
-                    continue
+                    # ASSUMES ONE LINERS ARE ALWAYS ATM FEES
+                    date = page_lines[expense_line].split(' ')[0] + '/' + year
+                    vendor = 'ATM FEE'
+                    amount = float(3)
                 else:
                     date = page_lines[expense_line].split(' ')[0] + '/' + year
                     descript = '_'.join(page_lines[expense_line].split(' ')[1::])
-                    vendor = page_lines[expense_line + 1]
-                    card = page_lines[expense_line + 2]
-                    amount = float(page_lines[expense_line + 3])
+                    vendor = page_lines[expense_line+1]
+                    card = page_lines[expense_line+2]
+                    amount = float(page_lines[expense_line+3])
                 paid_through = 'Sauwce LLC'
                 
                 # prompt user to assign epense to an account
@@ -282,13 +291,16 @@ def main():
             for expense_line in expense_lines:
                 if any([x==expense_line for x in expense_one_liners]):
                     # handle one liners here
-                    continue
+                    # ASSUMES ONE LINERS ARE ALWAYS ATM FEES
+                    date = page_lines[expense_line].split(' ')[0] + '/' + year
+                    vendor = 'ATM FEE'
+                    amount = float(3)
                 else:
                     date = page_lines[expense_line].split(' ')[0] + '/' + year
                     descript = '_'.join(page_lines[expense_line].split(' ')[1::])
-                    vendor = page_lines[expense_line + 1]
-                    card = page_lines[expense_line + 2]
-                    amount = float(''.join(page_lines[expense_line + 3].split(',')))
+                    vendor = page_lines[expense_line+1]
+                    card = page_lines[expense_line+2]
+                    amount = float(''.join(page_lines[expense_line+3].split(',')))
                 paid_through = 'Sauwce LLC'
                 
                 # prompt user to assign epense to an account
