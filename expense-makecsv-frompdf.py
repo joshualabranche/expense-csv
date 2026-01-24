@@ -230,8 +230,6 @@ def main():
             break
         # process the first page here as it may start at any line
         if page_num == expense_page_start:
-            print(expense_lines)
-            print(expense_one_liners)
             for expense_line in expense_lines:
                 if any([x==expense_line for x in expense_one_liners]):
                     # handle one liners here
@@ -255,8 +253,6 @@ def main():
                 expense_num += 1
         # process the last page here as it may end on any line
         elif page_num == expense_page_end:
-            print(expense_lines)
-            print(expense_one_liners)
             for expense_line in expense_lines:
                 if any([x==expense_line for x in expense_one_liners]):
                     # handle one liners here
@@ -283,8 +279,6 @@ def main():
             #skip the "How to Balance Page"
             if page_lines[0]=="How to Balance your Account":
                 continue
-            print(expense_lines)
-            print(expense_one_liners)
             for expense_line in expense_lines:
                 if any([x==expense_line for x in expense_one_liners]):
                     # handle one liners here
