@@ -186,6 +186,9 @@ def main():
         page_lines = pdf_file.pages[page_num].extract_text().splitlines()
         # get the lines that are the start of an expense
         expense_lines = get_expense_lines(page_lines,month,expense_line_start,expense_line_end,page_num==expense_page_start,page_num==expense_page_end)
+        # account for the case where the expense begins on the last line
+        if expense_lines[-1] == expense_line_end:
+            expense_lines.append(expense_line_end+1)
         # get any lines of expenses that are only 1 line long
         line_diff = []
         for i in range(len(expense_lines)-1):
