@@ -42,7 +42,7 @@ def get_expense_lines(page, month, expense_start, expense_end, first_page=False,
             line_num += 1
     else:
         for line in page:
-            if line=='Other Withdrawals':
+            if line == 'Other Withdrawals' or line == 'Service Charges':
                 break
             else:
                 if any([(str(month_to_int[month]).zfill(2) + '/' + x) == line[0:5] for x in days]):
@@ -187,14 +187,21 @@ def main():
         # get the lines that are the start of an expense
         expense_lines = get_expense_lines(page_lines,month,expense_line_start,expense_line_end,page_num==expense_page_start,page_num==expense_page_end)
         # account for the case where the expense begins on the last line
-        if expense_lines[-1] == expense_line_end:
-            expense_lines.append(expense_line_end+1)
+        appended_expense_flag = 0
+        if len(expense_lines) > 0:
+            if expense_lines[-1] == len(page_lines)-1:
+                appended_expense_flag = 1
+                expense_lines.append(len(page_lines))
         # get any lines of expenses that are only 1 line long
         line_diff = []
         for i in range(len(expense_lines)-1):
             line_diff.append(expense_lines[i+1]-expense_lines[i])
         expense_one_liners = [i for i,x in enumerate(line_diff) if x==1]
         expense_one_liners = [expense_lines[x] for x in expense_one_liners]
+       
+        # fix the appended expense line list
+        if appended_expense_flag:
+            expense_lines = expense_lines[0:-1]
        
         # process unique case where there is only one page
         if expense_page_start == expense_page_end:
@@ -223,6 +230,8 @@ def main():
             break
         # process the first page here as it may start at any line
         if page_num == expense_page_start:
+            print(expense_lines)
+            print(expense_one_liners)
             for expense_line in expense_lines:
                 if any([x==expense_line for x in expense_one_liners]):
                     # handle one liners here
@@ -246,7 +255,8 @@ def main():
                 expense_num += 1
         # process the last page here as it may end on any line
         elif page_num == expense_page_end:
-
+            print(expense_lines)
+            print(expense_one_liners)
             for expense_line in expense_lines:
                 if any([x==expense_line for x in expense_one_liners]):
                     # handle one liners here
@@ -273,8 +283,8 @@ def main():
             #skip the "How to Balance Page"
             if page_lines[0]=="How to Balance your Account":
                 continue
-    
-
+            print(expense_lines)
+            print(expense_one_liners)
             for expense_line in expense_lines:
                 if any([x==expense_line for x in expense_one_liners]):
                     # handle one liners here
