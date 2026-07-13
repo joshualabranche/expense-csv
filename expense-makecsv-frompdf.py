@@ -109,9 +109,18 @@ def main():
     
     # what year is it?
     #year = datetime.datetime.now().strftime("%Y")[2::]
-    year = pdf_file.pages[0].extract_text().splitlines()
-    month = year[7][-11:-8]
-    year  = year[7][-2::]
+    date_info = pdf_file.pages[0].extract_text().splitlines()
+    found_date = False
+    date_index = 0
+    while not found_date:
+        found_date = (date_info[date_index][0:16]=='Statement Period')
+        if found_date:
+            break
+        else:
+            date_index += 1
+
+    month = date_info[date_index][-11:-8]
+    year  = date_info[date_index][-2::]
     
     # look for the page and line where electronic payments start
     expense_page_start = 0
