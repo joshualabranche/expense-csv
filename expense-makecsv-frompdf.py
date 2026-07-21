@@ -8,6 +8,7 @@ Created on Tue Jan 14 21:30:02 2025
 
 import csv
 import pypdf
+import numpy as np
 import tkinter as tk
 from tkinter import filedialog
 
@@ -64,9 +65,9 @@ def get_int_input():
     return int(raw) 
 
 # define function to clean up user input expense account
-def get_expense_account(expenses,vendor,amount):
+def get_expense_account(expenses,vendor,date,amount):
     # prompt user to assign expense account id to expense
-    print(f'Current expense from: {vendor} for: $' + '{:0.2f}'.format(amount))
+    print(f'Current expense from: {vendor} on {date} for: $' + '{:0.2f}'.format(amount))
     raw = get_int_input()   
     while not 0 < raw < len(expenses) + 1:
         if raw == 0:
@@ -144,16 +145,20 @@ def main():
     expense_page_end = expense_page_start
     found_page = False
     for current_page in range(expense_page_start+1,num_pages):
-        page_lines = pdf_file.pages[current_page].extract_text().splitlines()
-        if len(page_lines) > 10:
-            if (page_lines[10] == 'Electronic Payments (continued)') or (page_lines[0] == 'How to Balance your Account'):
-                expense_page_end += 1
+        page_lines = np.array(pdf_file.pages[current_page].extract_text().splitlines())
+        out = np.where(page_lines=='Electronic Payments (continued)')
+        if len(out[0]) > 0:
+            expense_page_end += 1
         else:
             break
     
     # look for the last payment line on the page where electronic payments end
     expense_line_end = 0
     page_lines = pdf_file.pages[expense_page_end].extract_text().splitlines()
+    tmp = [x[0:9]=='Subtotal:' for x in page_lines]
+    inds = np.where(np.array(tmp)==True)[0]
+    expense_line_end = int(inds[0])
+    """
     for lines in page_lines:
         if lines[0:9]=='Subtotal:':
             if (expense_line_end < expense_line_start) and (expense_page_start==expense_page_end):
@@ -162,6 +167,7 @@ def main():
                 break
         else:
             expense_line_end += 1
+    """
     
     # expense account id list
     expenses = ['Cost of Goods Sold',
@@ -231,7 +237,7 @@ def main():
                 paid_through = 'Sauwce LLC'
                 
                 # prompt user to assign epense to an account
-                raw = get_expense_account(expenses, vendor, amount)
+                raw = get_expense_account(expenses, vendor, date, amount)
         
                 # expense account id is defined by given user index for expenses list
                 account = expenses[raw-1]
@@ -247,8 +253,9 @@ def main():
                     # handle one liners here
                     # ASSUMES ONE LINERS ARE ALWAYS ATM FEES
                     date = page_lines[expense_line].split(' ')[0] + '/' + year
-                    vendor = 'ATM FEE'
-                    amount = float(3)
+                    vendor = page_lines[expense_line].split(',')[0]
+                    vendor = (' ').join(vendor.split(' ')[1::])
+                    amount = float(page_lines[expense_line].split(' ')[-1])
                 else:
                     date = page_lines[expense_line].split(' ')[0] + '/' + year
                     descript = '_'.join(page_lines[expense_line].split(' ')[1::])
@@ -258,7 +265,7 @@ def main():
                 paid_through = 'Sauwce LLC'
                 
                 # prompt user to assign epense to an account
-                raw = get_expense_account(expenses, vendor, amount)
+                raw = get_expense_account(expenses, vendor, date, amount)
         
                 # expense account id is defined by given user index for expenses list
                 account = expenses[raw-1]
@@ -273,8 +280,9 @@ def main():
                     # handle one liners here
                     # ASSUMES ONE LINERS ARE ALWAYS ATM FEES
                     date = page_lines[expense_line].split(' ')[0] + '/' + year
-                    vendor = 'ATM FEE'
-                    amount = float(3)
+                    vendor = page_lines[expense_line].split(',')[0]
+                    vendor = (' ').join(vendor.split(' ')[1::])
+                    amount = float(page_lines[expense_line].split(' ')[-1])
                 else:
                     date = page_lines[expense_line].split(' ')[0] + '/' + year
                     descript = '_'.join(page_lines[expense_line].split(' ')[1::])
@@ -284,7 +292,7 @@ def main():
                 paid_through = 'Sauwce LLC'
                 
                 # prompt user to assign epense to an account
-                raw = get_expense_account(expenses, vendor, amount)
+                raw = get_expense_account(expenses, vendor, date, amount)
         
                 # expense account id is defined by given user index for expenses list
                 account = expenses[raw-1]
@@ -302,8 +310,9 @@ def main():
                     # handle one liners here
                     # ASSUMES ONE LINERS ARE ALWAYS ATM FEES
                     date = page_lines[expense_line].split(' ')[0] + '/' + year
-                    vendor = 'ATM FEE'
-                    amount = float(3)
+                    vendor = page_lines[expense_line].split(',')[0]
+                    vendor = (' ').join(vendor.split(' ')[1::])
+                    amount = float(page_lines[expense_line].split(' ')[-1])
                 else:
                     date = page_lines[expense_line].split(' ')[0] + '/' + year
                     descript = '_'.join(page_lines[expense_line].split(' ')[1::])
@@ -313,7 +322,7 @@ def main():
                 paid_through = 'Sauwce LLC'
                 
                 # prompt user to assign epense to an account
-                raw = get_expense_account(expenses, vendor, amount)
+                raw = get_expense_account(expenses, vendor, date, amount)
         
                 # expense account id is defined by given user index for expenses list
                 account = expenses[raw-1]
